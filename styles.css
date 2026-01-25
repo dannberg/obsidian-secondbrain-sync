@@ -4,35 +4,78 @@
 .secondbrain-status-bar {
 	display: flex;
 	align-items: center;
-	gap: 4px;
+	gap: 6px;
 	cursor: default;
+	padding: 0 4px;
+	border-radius: 4px;
+	transition: background-color 0.2s ease;
+}
+
+.secondbrain-status-bar:hover {
+	background-color: var(--background-modifier-hover);
 }
 
 .secondbrain-status-bar .secondbrain-icon {
-	font-size: 12px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.secondbrain-status-bar .secondbrain-icon svg {
+	width: 14px;
+	height: 14px;
 }
 
 .secondbrain-status-bar .secondbrain-text {
-	font-size: 11px;
+	font-size: 12px;
+	font-weight: 500;
 }
 
+/* Idle state - green checkmark */
 .secondbrain-status-bar.idle .secondbrain-icon {
 	color: var(--text-success);
+}
+
+.secondbrain-status-bar.idle .secondbrain-text {
+	color: var(--text-muted);
+}
+
+/* Syncing state - accent color with animation */
+.secondbrain-status-bar.syncing {
+	background-color: var(--background-modifier-hover);
 }
 
 .secondbrain-status-bar.syncing .secondbrain-icon {
 	color: var(--text-accent);
 }
 
-.secondbrain-status-bar.syncing .secondbrain-icon.spinning {
+.secondbrain-status-bar.syncing .secondbrain-text {
+	color: var(--text-accent);
+}
+
+.secondbrain-status-bar.syncing .secondbrain-icon.spinning svg {
 	animation: spin 1s linear infinite;
+}
+
+/* Error state - red warning */
+.secondbrain-status-bar.error {
+	background-color: rgba(var(--color-red-rgb), 0.1);
 }
 
 .secondbrain-status-bar.error .secondbrain-icon {
 	color: var(--text-error);
 }
 
+.secondbrain-status-bar.error .secondbrain-text {
+	color: var(--text-error);
+}
+
+/* Disconnected state - muted */
 .secondbrain-status-bar.disconnected .secondbrain-icon {
+	color: var(--text-muted);
+}
+
+.secondbrain-status-bar.disconnected .secondbrain-text {
 	color: var(--text-muted);
 }
 

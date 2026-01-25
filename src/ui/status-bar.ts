@@ -2,7 +2,7 @@
  * Status bar indicator for sync state.
  */
 
-import { Plugin } from 'obsidian';
+import { Plugin, setIcon } from 'obsidian';
 import { SyncStatus } from '../types';
 
 /**
@@ -39,14 +39,15 @@ export class StatusBarManager {
 	 */
 	setIdle(): void {
 		this.statusBarEl.empty();
-		this.statusBarEl.removeClass('syncing', 'error');
+		this.statusBarEl.removeClass('syncing', 'error', 'disconnected');
 		this.statusBarEl.addClass('idle');
+		this.statusBarEl.removeAttribute('aria-label');
 
 		const icon = this.statusBarEl.createSpan({ cls: 'secondbrain-icon' });
-		icon.innerHTML = '&#x2713;'; // Checkmark
+		setIcon(icon, 'check-circle');
 
 		this.statusBarEl.createSpan({
-			text: ' SB Sync',
+			text: 'SB Synced',
 			cls: 'secondbrain-text',
 		});
 	}
@@ -56,17 +57,19 @@ export class StatusBarManager {
 	 */
 	setSyncing(synced?: number, total?: number): void {
 		this.statusBarEl.empty();
-		this.statusBarEl.removeClass('idle', 'error');
+		this.statusBarEl.removeClass('idle', 'error', 'disconnected');
 		this.statusBarEl.addClass('syncing');
+		this.statusBarEl.removeAttribute('aria-label');
 
 		const icon = this.statusBarEl.createSpan({ cls: 'secondbrain-icon spinning' });
-		icon.innerHTML = '&#x21BB;'; // Rotating arrows
+		setIcon(icon, 'refresh-cw');
 
-		let text = ' Syncing';
+		let text = 'Syncing';
 		if (synced !== undefined && total !== undefined && total > 0) {
-			text += ` (${synced}/${total})`;
+			const percent = Math.round((synced / total) * 100);
+			text = `Syncing ${synced}/${total} (${percent}%)`;
 		} else {
-			text += '...';
+			text = 'Syncing...';
 		}
 
 		this.statusBarEl.createSpan({
@@ -80,19 +83,20 @@ export class StatusBarManager {
 	 */
 	setError(message?: string): void {
 		this.statusBarEl.empty();
-		this.statusBarEl.removeClass('idle', 'syncing');
+		this.statusBarEl.removeClass('idle', 'syncing', 'disconnected');
 		this.statusBarEl.addClass('error');
 
 		const icon = this.statusBarEl.createSpan({ cls: 'secondbrain-icon' });
-		icon.innerHTML = '&#x26A0;'; // Warning
+		setIcon(icon, 'alert-triangle');
 
 		this.statusBarEl.createSpan({
-			text: ' SB Sync Error',
+			text: 'SB Sync Error',
 			cls: 'secondbrain-text',
 		});
 
 		if (message) {
-			this.statusBarEl.setAttribute('aria-label', message);
+			this.statusBarEl.setAttribute('aria-label', `Error: ${message}`);
+			this.statusBarEl.setAttribute('title', `Error: ${message}`);
 		}
 	}
 
@@ -103,13 +107,16 @@ export class StatusBarManager {
 		this.statusBarEl.empty();
 		this.statusBarEl.removeClass('idle', 'syncing', 'error');
 		this.statusBarEl.addClass('disconnected');
+		this.statusBarEl.removeAttribute('aria-label');
 
 		const icon = this.statusBarEl.createSpan({ cls: 'secondbrain-icon' });
-		icon.innerHTML = '&#x25CB;'; // Empty circle
+		setIcon(icon, 'unlink');
 
 		this.statusBarEl.createSpan({
-			text: ' SB Sync (Not configured)',
+			text: 'SB Not configured',
 			cls: 'secondbrain-text',
 		});
+
+		this.statusBarEl.setAttribute('title', 'Click to configure Second Brain Digest sync');
 	}
 }

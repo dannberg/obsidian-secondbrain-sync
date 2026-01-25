@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-secondbrain-sync",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "Sync your Obsidian vault to Second Brain Digest for personalized daily digest emails.",
 	"main": "main.js",
 	"scripts": {

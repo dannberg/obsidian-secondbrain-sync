@@ -9,6 +9,7 @@ import { NoteMetadata, SyncStatus, ExclusionRules } from '../types';
 import { VaultScanner } from './scanner';
 import { SyncTracker } from './tracker';
 import { ExclusionChecker } from './exclusions';
+import { SyncProgressModal, PROGRESS_MODAL_THRESHOLD } from '../ui/sync-progress-modal';
 
 /**
  * Batch size for sync requests (server allows 100, we use 50 for safety)
@@ -175,7 +176,12 @@ export class VaultSyncer {
 
 		this.debug('Starting full sync');
 		this.isSyncing = true;
+
+		// Show initial notice
+		new Notice('Starting vault sync...');
 		this.updateStatus({ state: 'syncing', pendingCount: 0, syncedCount: 0 });
+
+		let progressModal: SyncProgressModal | null = null;
 
 		try {
 			// Get all markdown files
@@ -189,6 +195,14 @@ export class VaultSyncer {
 			);
 			this.debug(`${filesToSync.length} files after exclusions`);
 
+			// Show progress modal for large syncs
+			if (filesToSync.length > PROGRESS_MODAL_THRESHOLD) {
+				progressModal = new SyncProgressModal(this.app);
+				progressModal.open();
+				progressModal.setTotal(filesToSync.length);
+				progressModal.setStatus('Scanning files...');
+			}
+
 			// Scan all files
 			const notes = await this.scanner.scanFiles(filesToSync);
 
@@ -196,8 +210,13 @@ export class VaultSyncer {
 			const filteredNotes = this.exclusionChecker.filterNotes(notes);
 			this.debug(`${filteredNotes.length} notes after tag exclusions`);
 
+			if (progressModal) {
+				progressModal.setTotal(filteredNotes.length);
+				progressModal.setStatus('Uploading notes...');
+			}
+
 			// Sync in batches
-			await this.syncNotesBatched(filteredNotes, true);
+			await this.syncNotesBatched(filteredNotes, true, progressModal);
 
 			// Find notes that were deleted from vault
 			const currentPaths = new Set(filteredNotes.map(n => n.path));
@@ -205,6 +224,9 @@ export class VaultSyncer {
 				.filter(path => !currentPaths.has(path));
 
 			if (deletedPaths.length > 0) {
+				if (progressModal) {
+					progressModal.setStatus(`Removing ${deletedPaths.length} deleted notes...`);
+				}
 				await this.deleteNotes(deletedPaths);
 			}
 
@@ -212,11 +234,21 @@ export class VaultSyncer {
 			await this.tracker.updateLastSyncTime();
 
 			this.updateStatus({ state: 'idle' });
-			new Notice(`Synced ${filteredNotes.length} notes`);
+
+			// Close modal and show success
+			if (progressModal) {
+				progressModal.close();
+			}
+			new Notice(`Sync complete: ${filteredNotes.length} notes synced`);
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Unknown error';
 			this.updateStatus({ state: 'error', error: message });
-			new Notice(`Sync failed: ${message}`);
+
+			// Close modal and show error
+			if (progressModal) {
+				progressModal.close();
+			}
+			new Notice(`Sync failed: ${message}`, 5000);
 			console.error('[SecondBrain] Full sync failed:', error);
 		} finally {
 			this.isSyncing = false;
@@ -231,11 +263,12 @@ export class VaultSyncer {
 			return;
 		}
 
+		const totalChanges = changedPaths.length + deletedPaths.length;
 		this.debug(`Syncing changes: ${changedPaths.length} changed, ${deletedPaths.length} deleted`);
 		this.isSyncing = true;
 		this.updateStatus({
 			state: 'syncing',
-			pendingCount: changedPaths.length + deletedPaths.length,
+			pendingCount: totalChanges,
 			syncedCount: 0,
 		});
 
@@ -275,9 +308,15 @@ export class VaultSyncer {
 			await this.tracker.updateLastSyncTime();
 
 			this.updateStatus({ state: 'idle' });
+
+			// Show completion notice for incremental syncs
+			if (totalChanges > 1) {
+				new Notice(`Synced ${totalChanges} changes`);
+			}
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Unknown error';
 			this.updateStatus({ state: 'error', error: message });
+			new Notice(`Sync failed: ${message}`, 5000);
 			console.error('[SecondBrain] Sync changes failed:', error);
 		} finally {
 			this.isSyncing = false;
@@ -287,15 +326,21 @@ export class VaultSyncer {
 	/**
 	 * Sync notes in batches.
 	 */
-	private async syncNotesBatched(notes: NoteMetadata[], isFullSync: boolean): Promise<void> {
+	private async syncNotesBatched(
+		notes: NoteMetadata[],
+		isFullSync: boolean,
+		progressModal?: SyncProgressModal | null
+	): Promise<void> {
 		const totalNotes = notes.length;
 		let syncedCount = 0;
+		const totalBatches = Math.ceil(notes.length / BATCH_SIZE);
 
 		for (let i = 0; i < notes.length; i += BATCH_SIZE) {
 			const batch = notes.slice(i, i + BATCH_SIZE);
 			const isLastBatch = i + BATCH_SIZE >= notes.length;
+			const batchNum = Math.floor(i / BATCH_SIZE) + 1;
 
-			this.debug(`Syncing batch ${Math.floor(i / BATCH_SIZE) + 1}, ${batch.length} notes`);
+			this.debug(`Syncing batch ${batchNum}/${totalBatches}, ${batch.length} notes`);
 
 			const payloads: NotePayload[] = batch.map(note => ({
 				path: note.path,
@@ -334,6 +379,12 @@ export class VaultSyncer {
 				pendingCount: totalNotes,
 				syncedCount,
 			});
+
+			// Update progress modal if present
+			if (progressModal) {
+				progressModal.setCurrent(syncedCount);
+				progressModal.setStatus(`Uploading batch ${batchNum}/${totalBatches}...`);
+			}
 
 			// Log any errors
 			for (const error of response.errors) {
