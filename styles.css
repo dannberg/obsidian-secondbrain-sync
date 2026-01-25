@@ -1,0 +1,117 @@
+/* Second Brain Digest Sync Plugin Styles */
+
+/* Status bar styles */
+.secondbrain-status-bar {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	cursor: default;
+}
+
+.secondbrain-status-bar .secondbrain-icon {
+	font-size: 12px;
+}
+
+.secondbrain-status-bar .secondbrain-text {
+	font-size: 11px;
+}
+
+.secondbrain-status-bar.idle .secondbrain-icon {
+	color: var(--text-success);
+}
+
+.secondbrain-status-bar.syncing .secondbrain-icon {
+	color: var(--text-accent);
+}
+
+.secondbrain-status-bar.syncing .secondbrain-icon.spinning {
+	animation: spin 1s linear infinite;
+}
+
+.secondbrain-status-bar.error .secondbrain-icon {
+	color: var(--text-error);
+}
+
+.secondbrain-status-bar.disconnected .secondbrain-icon {
+	color: var(--text-muted);
+}
+
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* Settings tab styles */
+.secondbrain-sync-status {
+	padding: 12px;
+	background: var(--background-secondary);
+	border-radius: 6px;
+	margin-bottom: 16px;
+}
+
+.secondbrain-status-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.secondbrain-status-table td {
+	padding: 4px 8px;
+}
+
+.secondbrain-status-table td:first-child {
+	font-weight: 500;
+	color: var(--text-muted);
+	width: 120px;
+}
+
+/* Progress modal styles */
+.secondbrain-progress-modal {
+	padding: 20px;
+}
+
+.secondbrain-progress-modal h2 {
+	margin-top: 0;
+	margin-bottom: 20px;
+}
+
+.secondbrain-progress-modal .progress-container {
+	margin-bottom: 16px;
+}
+
+.secondbrain-progress-modal .progress-bar-bg {
+	height: 8px;
+	background: var(--background-modifier-border);
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.secondbrain-progress-modal .progress-bar-fill {
+	height: 100%;
+	background: var(--interactive-accent);
+	border-radius: 4px;
+	width: 0%;
+	transition: width 0.3s ease;
+}
+
+.secondbrain-progress-modal .progress-text {
+	text-align: center;
+	font-weight: 500;
+	margin-bottom: 8px;
+}
+
+.secondbrain-progress-modal .status-text {
+	text-align: center;
+	color: var(--text-muted);
+	font-size: 0.9em;
+}
+
+/* Settings textarea improvements */
+.setting-item-control textarea {
+	min-height: 80px;
+	font-family: var(--font-monospace);
+	font-size: 0.9em;
+}

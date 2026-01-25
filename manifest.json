@@ -1,0 +1,11 @@
+{
+	"id": "secondbrain-sync",
+	"name": "Second Brain Digest Sync",
+	"version": "1.0.0",
+	"minAppVersion": "1.0.0",
+	"description": "Sync your Obsidian vault to Second Brain Digest for personalized daily digest emails with AI-powered insights.",
+	"author": "Dann Berg",
+	"authorUrl": "https://dannb.org",
+	"fundingUrl": "https://github.com/sponsors/dannberg",
+	"isDesktopOnly": false
+}
