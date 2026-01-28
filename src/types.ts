@@ -6,12 +6,14 @@
  * Plugin settings stored in data.json
  */
 export interface PluginSettings {
-	/** Server URL (default: https://app.secondbraindigest.com) */
-	serverUrl: string;
 	/** API authentication token */
 	apiToken: string;
 	/** Enable automatic sync on file changes */
 	autoSync: boolean;
+	/** Enable scheduled sync before digest time */
+	scheduledSync: boolean;
+	/** Hours before digest to trigger sync */
+	scheduledSyncHoursBefore: number;
 	/** Debug mode for verbose logging */
 	debugMode: boolean;
 }
@@ -20,9 +22,10 @@ export interface PluginSettings {
  * Default plugin settings
  */
 export const DEFAULT_SETTINGS: PluginSettings = {
-	serverUrl: 'https://app.secondbraindigest.com',
 	apiToken: '',
 	autoSync: true,
+	scheduledSync: true,
+	scheduledSyncHoursBefore: 2,
 	debugMode: false,
 };
 

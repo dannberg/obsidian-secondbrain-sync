@@ -12,14 +12,19 @@ import {
 	ExclusionsRequest,
 	ExclusionsResponse,
 	GetExclusionsResponse,
+	ScheduleResponse,
 	ApiError,
 } from './types';
+
+/**
+ * The production server URL (not configurable by users)
+ */
+const SERVER_URL = 'https://secondbraindigest.com';
 
 /**
  * API client configuration
  */
 export interface ApiClientConfig {
-	serverUrl: string;
 	apiToken: string;
 	debugMode?: boolean;
 }
@@ -114,6 +119,13 @@ export class ApiClient {
 	}
 
 	/**
+	 * Get user's digest schedule
+	 */
+	async getDigestSchedule(): Promise<ScheduleResponse> {
+		return this.request<ScheduleResponse>('GET', '/api/vault/schedule');
+	}
+
+	/**
 	 * Test connection to server
 	 */
 	async testConnection(): Promise<{ success: boolean; error?: string }> {
@@ -204,8 +216,7 @@ export class ApiClient {
 	}
 
 	private buildUrl(path: string): string {
-		const base = this.config.serverUrl.replace(/\/$/, '');
-		return `${base}${path}`;
+		return `${SERVER_URL}${path}`;
 	}
 
 	private sleep(ms: number): Promise<void> {

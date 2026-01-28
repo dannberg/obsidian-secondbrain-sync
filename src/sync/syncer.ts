@@ -360,6 +360,7 @@ export class VaultSyncer {
 				batch_id: this.generateBatchId(),
 				notes: payloads,
 				is_final_batch: isLastBatch && isFullSync,
+				vault_name: this.app.vault.getName(),
 			});
 
 			// Update tracker with synced hashes

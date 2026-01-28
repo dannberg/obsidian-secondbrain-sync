@@ -40,6 +40,8 @@ export interface SyncRequest {
 	notes: NotePayload[];
 	/** Whether this is the final batch */
 	is_final_batch: boolean;
+	/** Name of the Obsidian vault (for deep links) */
+	vault_name?: string;
 }
 
 /**
@@ -126,6 +128,22 @@ export interface GetExclusionsResponse {
 	folders: string[];
 	/** Excluded tags */
 	tags: string[];
+}
+
+/**
+ * Digest schedule response from server
+ */
+export interface ScheduleResponse {
+	/** Whether scheduled digests are enabled */
+	is_enabled: boolean;
+	/** Hour to send digest (0-23) */
+	hour: number;
+	/** Minute to send digest (0-59) */
+	minute: number;
+	/** User's timezone string */
+	timezone: string;
+	/** Next scheduled digest time in UTC (ISO 8601), null if disabled */
+	next_digest_utc: string | null;
 }
 
 /**

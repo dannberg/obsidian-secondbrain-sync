@@ -21,6 +21,7 @@ import { VaultScanner } from './sync/scanner';
 import { SyncTracker } from './sync/tracker';
 import { ExclusionChecker } from './sync/exclusions';
 import { VaultSyncer } from './sync/syncer';
+import { ScheduledSyncManager } from './sync/scheduled-sync';
 import { SecondBrainSettingTab } from './settings/settings-tab';
 import { validateSettings, isConfigured } from './settings/settings-data';
 import { StatusBarManager } from './ui/status-bar';
@@ -45,6 +46,7 @@ export default class SecondBrainSyncPlugin extends Plugin {
 	tracker!: SyncTracker;
 	exclusionChecker!: ExclusionChecker;
 	syncer!: VaultSyncer;
+	scheduledSyncManager!: ScheduledSyncManager;
 	statusBar!: StatusBarManager;
 
 	private eventRefs: Array<ReturnType<typeof this.registerEvent>> = [];
@@ -90,11 +92,19 @@ export default class SecondBrainSyncPlugin extends Plugin {
 			setTimeout(() => this.performStartupCheck(), STARTUP_DELAY);
 		}
 
+		// Start scheduled sync manager after startup delay
+		if (isConfigured(this.settings) && this.settings.scheduledSync) {
+			setTimeout(() => this.scheduledSyncManager.start(), STARTUP_DELAY + 1000);
+		}
+
 		console.log('[SecondBrain] Plugin loaded');
 	}
 
 	onunload(): void {
 		console.log('[SecondBrain] Unloading plugin');
+
+		// Stop scheduled sync manager
+		this.scheduledSyncManager?.stop();
 
 		// Event refs are automatically cleaned up by Obsidian
 		this.eventRefs = [];
@@ -106,7 +116,6 @@ export default class SecondBrainSyncPlugin extends Plugin {
 	private initializeComponents(): void {
 		// API client
 		this.apiClient = new ApiClient({
-			serverUrl: this.settings.serverUrl,
 			apiToken: this.settings.apiToken,
 			debugMode: this.settings.debugMode,
 		});
@@ -144,6 +153,18 @@ export default class SecondBrainSyncPlugin extends Plugin {
 			},
 			this.settings.debugMode
 		);
+
+		// Scheduled sync manager
+		this.scheduledSyncManager = new ScheduledSyncManager(
+			this.apiClient,
+			async () => this.syncer.fullSync(),
+			this.settings,
+			(message) => {
+				if (this.settings.debugMode) {
+					console.log(`[SecondBrain] ${message}`);
+				}
+			}
+		);
 	}
 
 	/**
@@ -171,13 +192,20 @@ export default class SecondBrainSyncPlugin extends Plugin {
 
 		// Update API client config
 		this.apiClient.updateConfig({
-			serverUrl: this.settings.serverUrl,
 			apiToken: this.settings.apiToken,
 			debugMode: this.settings.debugMode,
 		});
 
 		// Update syncer debug mode
 		this.syncer.setDebugMode(this.settings.debugMode);
+
+		// Update scheduled sync manager
+		this.scheduledSyncManager.updateSettings(this.settings);
+		if (this.settings.scheduledSync && isConfigured(this.settings)) {
+			this.scheduledSyncManager.start();
+		} else {
+			this.scheduledSyncManager.stop();
+		}
 
 		// Update status bar
 		if (!isConfigured(this.settings)) {
@@ -267,6 +295,9 @@ export default class SecondBrainSyncPlugin extends Plugin {
 			this.statusBar.setDisconnected();
 			return;
 		}
+
+		// Update last sync time for health indicator
+		this.statusBar.setLastSyncTime(this.tracker.getLastSyncTime());
 		this.statusBar.update(status);
 	}
 

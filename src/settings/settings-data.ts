@@ -15,31 +15,12 @@ export function validateSettings(data: unknown): PluginSettings {
 	const obj = data as Record<string, unknown>;
 
 	return {
-		serverUrl: validateServerUrl(obj.serverUrl),
 		apiToken: validateApiToken(obj.apiToken),
 		autoSync: typeof obj.autoSync === 'boolean' ? obj.autoSync : DEFAULT_SETTINGS.autoSync,
+		scheduledSync: typeof obj.scheduledSync === 'boolean' ? obj.scheduledSync : DEFAULT_SETTINGS.scheduledSync,
+		scheduledSyncHoursBefore: validateScheduledSyncHours(obj.scheduledSyncHoursBefore),
 		debugMode: typeof obj.debugMode === 'boolean' ? obj.debugMode : DEFAULT_SETTINGS.debugMode,
 	};
-}
-
-/**
- * Validate server URL.
- */
-function validateServerUrl(value: unknown): string {
-	if (typeof value !== 'string' || !value.trim()) {
-		return DEFAULT_SETTINGS.serverUrl;
-	}
-
-	// Ensure it starts with http:// or https://
-	let url = value.trim();
-	if (!url.startsWith('http://') && !url.startsWith('https://')) {
-		url = 'https://' + url;
-	}
-
-	// Remove trailing slash
-	url = url.replace(/\/$/, '');
-
-	return url;
 }
 
 /**
@@ -53,10 +34,21 @@ function validateApiToken(value: unknown): string {
 }
 
 /**
+ * Validate scheduled sync hours before.
+ */
+function validateScheduledSyncHours(value: unknown): number {
+	if (typeof value !== 'number' || isNaN(value)) {
+		return DEFAULT_SETTINGS.scheduledSyncHoursBefore;
+	}
+	// Clamp between 1 and 12 hours
+	return Math.max(1, Math.min(12, Math.floor(value)));
+}
+
+/**
  * Check if settings are configured for sync.
  */
 export function isConfigured(settings: PluginSettings): boolean {
-	return !!(settings.serverUrl && settings.apiToken);
+	return !!settings.apiToken;
 }
 
 /**
@@ -65,9 +57,6 @@ export function isConfigured(settings: PluginSettings): boolean {
 export function getConfigurationStatus(settings: PluginSettings): string {
 	if (!settings.apiToken) {
 		return 'API token not configured';
-	}
-	if (!settings.serverUrl) {
-		return 'Server URL not configured';
 	}
 	return 'Configured';
 }

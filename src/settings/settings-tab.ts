@@ -37,18 +37,6 @@ export class SecondBrainSettingTab extends PluginSettingTab {
 		// Connection section
 		containerEl.createEl('h2', { text: 'Connection' });
 
-		// Server URL
-		new Setting(containerEl)
-			.setName('Server URL')
-			.setDesc('The URL of your Second Brain Digest server')
-			.addText(text => text
-				.setPlaceholder('https://app.secondbraindigest.com')
-				.setValue(this.plugin.settings.serverUrl)
-				.onChange(async (value) => {
-					this.plugin.settings.serverUrl = value || 'https://app.secondbraindigest.com';
-					await this.plugin.saveSettings();
-				}));
-
 		// API Token
 		let tokenInput: TextComponent;
 		new Setting(containerEl)
@@ -135,6 +123,30 @@ export class SecondBrainSettingTab extends PluginSettingTab {
 					this.plugin.settings.autoSync = value;
 					await this.plugin.saveSettings();
 					this.plugin.updateAutoSync();
+				}));
+
+		// Scheduled sync toggle
+		new Setting(containerEl)
+			.setName('Pre-digest sync')
+			.setDesc('Automatically sync before your scheduled digest time to ensure fresh data')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.scheduledSync)
+				.onChange(async (value) => {
+					this.plugin.settings.scheduledSync = value;
+					await this.plugin.saveSettings();
+				}));
+
+		// Scheduled sync hours before
+		new Setting(containerEl)
+			.setName('Hours before digest')
+			.setDesc('How many hours before your scheduled digest to trigger the sync')
+			.addSlider(slider => slider
+				.setLimits(1, 12, 1)
+				.setValue(this.plugin.settings.scheduledSyncHoursBefore)
+				.setDynamicTooltip()
+				.onChange(async (value) => {
+					this.plugin.settings.scheduledSyncHoursBefore = value;
+					await this.plugin.saveSettings();
 				}));
 
 		// Exclusions section
@@ -243,18 +255,77 @@ export class SecondBrainSettingTab extends PluginSettingTab {
 		const lastSync = this.plugin.tracker.getLastSyncTime();
 		const trackedCount = this.plugin.tracker.getTrackedCount();
 
+		// Add status container with health indicator
+		const statusContainer = containerEl.createEl('div', { cls: 'secondbrain-sync-health' });
+
+		// Health indicator
+		const healthStatus = this.getSyncHealthStatus(lastSync);
+		const healthEl = statusContainer.createEl('div', {
+			cls: `secondbrain-health-indicator ${healthStatus.class}`,
+		});
+		healthEl.createEl('span', { text: healthStatus.icon, cls: 'health-icon' });
+		healthEl.createEl('span', { text: healthStatus.label, cls: 'health-label' });
+
 		const table = containerEl.createEl('table', { cls: 'secondbrain-status-table' });
 
 		// Last sync row
 		const lastSyncRow = table.createEl('tr');
 		lastSyncRow.createEl('td', { text: 'Last sync:' });
-		lastSyncRow.createEl('td', {
-			text: lastSync ? new Date(lastSync).toLocaleString() : 'Never',
-		});
+		const lastSyncCell = lastSyncRow.createEl('td');
+		if (lastSync) {
+			const date = new Date(lastSync);
+			lastSyncCell.textContent = date.toLocaleString();
+			const hoursAgo = (Date.now() - date.getTime()) / (1000 * 60 * 60);
+			if (hoursAgo < 24) {
+				lastSyncCell.createEl('span', {
+					text: ` (${this.formatTimeAgo(hoursAgo)})`,
+					cls: 'sync-time-ago',
+				});
+			}
+		} else {
+			lastSyncCell.textContent = 'Never';
+		}
 
 		// Tracked notes row
 		const trackedRow = table.createEl('tr');
 		trackedRow.createEl('td', { text: 'Tracked notes:' });
 		trackedRow.createEl('td', { text: String(trackedCount) });
+
+		// Next scheduled digest (if available)
+		const schedule = this.plugin.scheduledSyncManager?.getCachedSchedule();
+		if (schedule && schedule.is_enabled && schedule.next_digest_utc) {
+			const digestRow = table.createEl('tr');
+			digestRow.createEl('td', { text: 'Next digest:' });
+			const nextDigest = new Date(schedule.next_digest_utc);
+			digestRow.createEl('td', { text: nextDigest.toLocaleString() });
+		}
+	}
+
+	private getSyncHealthStatus(lastSync: string | null): { icon: string; label: string; class: string } {
+		if (!lastSync) {
+			return { icon: '\u26A0', label: 'Not synced yet', class: 'health-warning' };
+		}
+
+		const hoursAgo = (Date.now() - new Date(lastSync).getTime()) / (1000 * 60 * 60);
+
+		if (hoursAgo < 24) {
+			return { icon: '\u2714', label: 'Healthy', class: 'health-good' };
+		} else if (hoursAgo < 48) {
+			return { icon: '\u26A0', label: 'Stale - sync recommended', class: 'health-warning' };
+		} else {
+			return { icon: '\u2757', label: 'Very stale - sync needed', class: 'health-critical' };
+		}
+	}
+
+	private formatTimeAgo(hours: number): string {
+		if (hours < 1) {
+			const minutes = Math.round(hours * 60);
+			return `${minutes}m ago`;
+		}
+		if (hours < 24) {
+			return `${Math.round(hours)}h ago`;
+		}
+		const days = Math.floor(hours / 24);
+		return `${days}d ago`;
 	}
 }
