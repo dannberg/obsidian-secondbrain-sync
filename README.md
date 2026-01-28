@@ -2,6 +2,8 @@
 
 An Obsidian plugin that syncs your vault to [Second Brain Digest](https://secondbraindigest.com) for personalized daily digest emails with AI-powered insights.
 
+**[View Full Documentation](https://docs.secondbraindigest.com)**
+
 ## Features
 
 - **Automatic Sync**: Changes are synced automatically when you modify, create, delete, or rename notes
@@ -123,6 +125,18 @@ The plugin communicates with these server endpoints:
 | `/api/vault/sync` | POST | Batch upload notes |
 | `/api/vault/exclusions` | GET/PUT | Manage exclusion rules |
 | `/api/vault/delete` | POST | Delete notes by path |
+
+## Documentation
+
+Full documentation is available at [docs.secondbraindigest.com](https://docs.secondbraindigest.com).
+
+To build the documentation locally:
+
+```bash
+pip install -r requirements-docs.txt
+mkdocs serve
+# Visit http://localhost:8000
+```
 
 ## License
 
