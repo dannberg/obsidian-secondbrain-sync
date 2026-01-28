@@ -17,3 +17,6 @@ Thumbs.db
 
 # Obsidian
 data.json
+
+# MkDocs
+site/

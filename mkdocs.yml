@@ -1,0 +1,28 @@
+site_name: Second Brain Digest
+site_description: AI-powered daily digests from your Obsidian vault
+repo_url: https://github.com/dannberg/obsidian-secondbrain-sync
+
+theme:
+  name: material
+  palette:
+    primary: indigo
+  features:
+    - navigation.sections
+    - navigation.expand
+    - search.highlight
+
+nav:
+  - Home: index.md
+  - User Guide:
+    - Getting Started: user-guide/getting-started.md
+    - Connecting Your Vault: user-guide/connecting-vault.md
+    - Settings & Preferences: user-guide/settings.md
+    - Email Scheduling: user-guide/scheduling.md
+  - Digest Modules:
+    - Overview: modules/overview.md
+    - Daily Recap: modules/daily-recap.md
+    - Complementary Insights: modules/complementary-info.md
+    - Connections & Crosslinks: modules/connections.md
+    - Random Resurfaced Note: modules/random-note.md
+    - This Day in History: modules/todays-history.md
+  - FAQ: faq.md
