@@ -359,7 +359,7 @@ export class VaultSyncer {
 			const response = await this.apiClient.syncNotes({
 				batch_id: this.generateBatchId(),
 				notes: payloads,
-				is_final_batch: isLastBatch && isFullSync,
+				is_final_batch: isLastBatch,
 				vault_name: this.app.vault.getName(),
 			});
 
