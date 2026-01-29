@@ -287,6 +287,7 @@ export class SecondBrainSettingTab extends PluginSettingTab {
 
 		const lastSync = this.plugin.tracker.getLastSyncTime();
 		const trackedCount = this.plugin.tracker.getTrackedCount();
+		const schedule = this.plugin.scheduledSyncManager?.getCachedSchedule();
 
 		// Add status container with health indicator
 		const statusContainer = containerEl.createEl('div', { cls: 'secondbrain-sync-health' });
@@ -325,12 +326,29 @@ export class SecondBrainSettingTab extends PluginSettingTab {
 		trackedRow.createEl('td', { text: String(trackedCount) });
 
 		// Next scheduled digest (if available)
-		const schedule = this.plugin.scheduledSyncManager?.getCachedSchedule();
 		if (schedule && schedule.is_enabled && schedule.next_digest_utc) {
 			const digestRow = table.createEl('tr');
 			digestRow.createEl('td', { text: 'Next digest:' });
 			const nextDigest = new Date(schedule.next_digest_utc);
-			digestRow.createEl('td', { text: nextDigest.toLocaleString() });
+			const hoursUntilDigest = (nextDigest.getTime() - Date.now()) / (1000 * 60 * 60);
+			const digestCell = digestRow.createEl('td', { text: nextDigest.toLocaleString() });
+
+			// Add time until digest if it's upcoming
+			if (hoursUntilDigest > 0 && hoursUntilDigest < 24) {
+				digestCell.createEl('span', {
+					text: ` (in ${this.formatTimeUntil(hoursUntilDigest)})`,
+					cls: 'sync-time-ago',
+				});
+			}
+		}
+
+		// Add digest-aware warning/guidance
+		const warning = this.getDigestWarning(lastSync, schedule);
+		if (warning) {
+			const warningEl = containerEl.createEl('div', {
+				cls: `secondbrain-digest-warning ${warning.class}`,
+			});
+			warningEl.createEl('p', { text: warning.message });
 		}
 	}
 
@@ -360,6 +378,70 @@ export class SecondBrainSettingTab extends PluginSettingTab {
 		}
 		const days = Math.floor(hours / 24);
 		return `${days}d ago`;
+	}
+
+	private formatTimeUntil(hours: number): string {
+		if (hours < 1) {
+			const minutes = Math.round(hours * 60);
+			return `${minutes}m`;
+		}
+		if (hours < 24) {
+			return `${Math.round(hours)}h`;
+		}
+		const days = Math.floor(hours / 24);
+		return `${days}d`;
+	}
+
+	private getDigestWarning(
+		lastSync: string | null,
+		schedule: any
+	): { message: string; class: string } | null {
+		// No warning if no scheduled digest
+		if (!schedule || !schedule.is_enabled || !schedule.next_digest_utc) {
+			return null;
+		}
+
+		const nextDigest = new Date(schedule.next_digest_utc);
+		const hoursUntilDigest = (nextDigest.getTime() - Date.now()) / (1000 * 60 * 60);
+
+		// Only show warnings if digest is approaching (within 12 hours)
+		if (hoursUntilDigest <= 0 || hoursUntilDigest > 12) {
+			return null;
+		}
+
+		// Check staleness
+		if (!lastSync) {
+			return {
+				message:
+					'⚠️ Your digest will use no data. Click "Sync Now" to sync your vault.',
+				class: 'warning-critical',
+			};
+		}
+
+		const hoursAgo = (Date.now() - new Date(lastSync).getTime()) / (1000 * 60 * 60);
+
+		if (hoursAgo > 24) {
+			// Stale data approaching digest
+			return {
+				message:
+					'⚠️ Your digest will use old data. Click "Sync Now" to refresh.',
+				class: 'warning-stale',
+			};
+		} else if (hoursUntilDigest < 2 && hoursAgo > 6) {
+			// Digest very soon but data somewhat old
+			return {
+				message: '💡 Consider syncing now for the freshest digest.',
+				class: 'warning-info',
+			};
+		} else if (hoursAgo < 2) {
+			// Fresh data, digest approaching
+			return {
+				message: '✓ Your vault is ready for the upcoming digest.',
+				class: 'warning-success',
+			};
+		}
+
+		return null;
 	}
 
 	/**

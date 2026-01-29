@@ -11,9 +11,20 @@ import { ScheduleResponse } from '../api/types';
 import { PluginSettings } from '../types';
 
 /**
- * Check interval for scheduled sync (1 hour in milliseconds)
+ * Progressive check intervals based on time until digest.
+ * Increases frequency as digest approaches for better sync reliability.
  */
-const CHECK_INTERVAL = 60 * 60 * 1000;
+const CHECK_INTERVALS = [
+	{ hoursBeforeDigest: 12, checkEvery: 60 * 60 * 1000 },  // 12h-6h: check every 1 hour
+	{ hoursBeforeDigest: 6, checkEvery: 30 * 60 * 1000 },   // 6h-2h: check every 30 min
+	{ hoursBeforeDigest: 2, checkEvery: 15 * 60 * 1000 },   // 2h-1h: check every 15 min
+	{ hoursBeforeDigest: 1, checkEvery: 10 * 60 * 1000 },   // 1h-0: check every 10 min
+];
+
+/**
+ * Default check interval when digest time is far away (1 hour)
+ */
+const DEFAULT_CHECK_INTERVAL = 60 * 60 * 1000;
 
 /**
  * Minimum time between scheduled syncs (to avoid repeated triggers)
@@ -81,11 +92,9 @@ export class ScheduledSyncManager {
 		// Do an immediate check
 		this.checkAndSync();
 
-		// Set up periodic checks
-		this.checkInterval = window.setInterval(
-			() => this.checkAndSync(),
-			CHECK_INTERVAL
-		);
+		// Set up periodic checks with default interval
+		// Will be rescheduled with appropriate interval after first check
+		this.scheduleNextCheck(DEFAULT_CHECK_INTERVAL);
 	}
 
 	/**
@@ -112,6 +121,8 @@ export class ScheduledSyncManager {
 
 			if (!schedule || !schedule.is_enabled || !schedule.next_digest_utc) {
 				this.debug('No scheduled digest or schedule disabled');
+				// Reschedule with default interval
+				this.scheduleNextCheck(DEFAULT_CHECK_INTERVAL);
 				return;
 			}
 
@@ -136,9 +147,15 @@ export class ScheduledSyncManager {
 					this.debug('Skipping sync - already synced recently');
 				}
 			}
+
+			// Reschedule with appropriate interval based on time until digest
+			const nextInterval = this.getCheckInterval(hoursUntilDigest);
+			this.scheduleNextCheck(nextInterval);
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'Unknown error';
 			this.debug(`Scheduled sync check failed: ${message}`);
+			// On error, retry with default interval
+			this.scheduleNextCheck(DEFAULT_CHECK_INTERVAL);
 		}
 	}
 
@@ -150,7 +167,7 @@ export class ScheduledSyncManager {
 		if (
 			this.cachedSchedule &&
 			this.scheduleLastFetched &&
-			Date.now() - this.scheduleLastFetched.getTime() < CHECK_INTERVAL
+			Date.now() - this.scheduleLastFetched.getTime() < DEFAULT_CHECK_INTERVAL
 		) {
 			return this.cachedSchedule;
 		}
@@ -163,6 +180,38 @@ export class ScheduledSyncManager {
 			this.debug('Failed to fetch digest schedule');
 			return null;
 		}
+	}
+
+	/**
+	 * Get the appropriate check interval based on hours until digest.
+	 */
+	private getCheckInterval(hoursUntilDigest: number): number {
+		// Find the appropriate interval based on time until digest
+		for (const tier of CHECK_INTERVALS) {
+			if (hoursUntilDigest <= tier.hoursBeforeDigest) {
+				return tier.checkEvery;
+			}
+		}
+		return DEFAULT_CHECK_INTERVAL;
+	}
+
+	/**
+	 * Schedule the next check with the given interval.
+	 */
+	private scheduleNextCheck(interval: number): void {
+		// Clear existing interval
+		if (this.checkInterval !== null) {
+			window.clearInterval(this.checkInterval);
+		}
+
+		// Schedule next check
+		this.checkInterval = window.setInterval(
+			() => this.checkAndSync(),
+			interval
+		);
+
+		const minutes = Math.round(interval / 60000);
+		this.debug(`Next check in ${minutes} minutes`);
 	}
 
 	/**
