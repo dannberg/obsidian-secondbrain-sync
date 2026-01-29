@@ -158,3 +158,97 @@
 	font-family: var(--font-monospace);
 	font-size: 0.9em;
 }
+
+/* Folder picker styles */
+.secondbrain-folder-picker {
+	margin-bottom: 16px;
+}
+
+.secondbrain-folder-picker .setting-item-name {
+	font-weight: 500;
+	margin-bottom: 4px;
+}
+
+.secondbrain-folder-picker .setting-item-description {
+	color: var(--text-muted);
+	font-size: 0.9em;
+	margin-bottom: 8px;
+}
+
+.secondbrain-folder-list {
+	max-height: 200px;
+	overflow-y: auto;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	padding: 8px;
+	background: var(--background-secondary);
+}
+
+.secondbrain-folder-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 4px 0;
+}
+
+.secondbrain-folder-item input[type="checkbox"] {
+	margin: 0;
+	flex-shrink: 0;
+}
+
+.secondbrain-folder-item label {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	cursor: pointer;
+	flex: 1;
+}
+
+.secondbrain-folder-name {
+	font-family: var(--font-monospace);
+	font-size: 0.9em;
+}
+
+.secondbrain-no-folders {
+	color: var(--text-muted);
+	font-style: italic;
+	padding: 8px;
+}
+
+/* Sync health indicator styles */
+.secondbrain-sync-health {
+	margin-bottom: 12px;
+}
+
+.secondbrain-health-indicator {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	border-radius: 6px;
+	font-weight: 500;
+}
+
+.secondbrain-health-indicator.health-good {
+	background: rgba(var(--color-green-rgb), 0.1);
+	color: var(--text-success);
+}
+
+.secondbrain-health-indicator.health-warning {
+	background: rgba(var(--color-yellow-rgb), 0.1);
+	color: var(--color-yellow);
+}
+
+.secondbrain-health-indicator.health-critical {
+	background: rgba(var(--color-red-rgb), 0.1);
+	color: var(--text-error);
+}
+
+.health-icon {
+	font-size: 1.1em;
+}
+
+.sync-time-ago {
+	color: var(--text-muted);
+	font-weight: normal;
+}

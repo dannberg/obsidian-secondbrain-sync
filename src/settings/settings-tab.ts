@@ -8,14 +8,12 @@ import {
 	Setting,
 	TextComponent,
 	Notice,
-	ButtonComponent,
+	TFolder,
 } from 'obsidian';
 import SecondBrainSyncPlugin from '../main';
 import { ExclusionRules } from '../types';
 import {
-	parseFolderExclusions,
 	parseTagExclusions,
-	formatFolderExclusions,
 	formatTagExclusions,
 } from '../sync/exclusions';
 
@@ -152,21 +150,56 @@ export class SecondBrainSettingTab extends PluginSettingTab {
 		// Exclusions section
 		containerEl.createEl('h2', { text: 'Exclusions' });
 
-		// Folder exclusions
+		// Get current exclusions
 		const exclusions = this.plugin.tracker.getExclusions();
-		let folderExclusionsText = formatFolderExclusions(exclusions.folders);
+		const excludedFolders = new Set(exclusions.folders);
 		let tagExclusionsText = formatTagExclusions(exclusions.tags);
 
-		new Setting(containerEl)
-			.setName('Excluded Folders')
-			.setDesc('Folders to exclude from sync (one per line). Notes in these folders will not be synced.')
-			.addTextArea(text => text
-				.setPlaceholder('private/\ntemplates/')
-				.setValue(folderExclusionsText)
-				.onChange((value) => {
-					folderExclusionsText = value;
-				}));
+		// Folder picker section
+		const folderSection = containerEl.createEl('div', { cls: 'secondbrain-folder-picker' });
+		folderSection.createEl('div', { text: 'Excluded Folders', cls: 'setting-item-name' });
+		folderSection.createEl('div', {
+			text: 'Select folders to exclude from sync. Notes in these folders will not be synced.',
+			cls: 'setting-item-description'
+		});
 
+		// Scrollable folder list
+		const folderList = folderSection.createEl('div', { cls: 'secondbrain-folder-list' });
+
+		// Get all folders from vault
+		const allFolders = this.getAllVaultFolders();
+
+		if (allFolders.length === 0) {
+			folderList.createEl('div', {
+				text: 'No folders found in vault',
+				cls: 'secondbrain-no-folders'
+			});
+		} else {
+			for (const folder of allFolders) {
+				const folderPath = folder.path + '/';
+				const depth = folder.path.split('/').length - 1;
+
+				const item = folderList.createEl('div', { cls: 'secondbrain-folder-item' });
+				item.style.paddingLeft = `${depth * 16 + 8}px`;
+
+				const checkbox = item.createEl('input', { type: 'checkbox' });
+				checkbox.checked = excludedFolders.has(folderPath);
+				checkbox.id = `folder-${folder.path.replace(/[^a-zA-Z0-9]/g, '-')}`;
+				checkbox.addEventListener('change', () => {
+					if (checkbox.checked) {
+						excludedFolders.add(folderPath);
+					} else {
+						excludedFolders.delete(folderPath);
+					}
+				});
+
+				const label = item.createEl('label');
+				label.htmlFor = checkbox.id;
+				label.createEl('span', { text: folder.name, cls: 'secondbrain-folder-name' });
+			}
+		}
+
+		// Tag exclusions (keep as textarea)
 		new Setting(containerEl)
 			.setName('Excluded Tags')
 			.setDesc('Tags to exclude from sync (one per line). Notes with these tags will not be synced.')
@@ -193,7 +226,7 @@ export class SecondBrainSettingTab extends PluginSettingTab {
 					btn.setButtonText('Saving...');
 
 					try {
-						const folders = parseFolderExclusions(folderExclusionsText);
+						const folders = Array.from(excludedFolders);
 						const tags = parseTagExclusions(tagExclusionsText);
 
 						const response = await this.plugin.apiClient.updateExclusions({
@@ -327,5 +360,27 @@ export class SecondBrainSettingTab extends PluginSettingTab {
 		}
 		const days = Math.floor(hours / 24);
 		return `${days}d ago`;
+	}
+
+	/**
+	 * Get all folders in the vault, sorted alphabetically.
+	 */
+	private getAllVaultFolders(): TFolder[] {
+		const root = this.app.vault.getRoot();
+		return this.getFoldersRecursively(root);
+	}
+
+	/**
+	 * Recursively get all folders starting from a parent folder.
+	 */
+	private getFoldersRecursively(folder: TFolder): TFolder[] {
+		const folders: TFolder[] = [];
+		for (const child of folder.children) {
+			if (child instanceof TFolder) {
+				folders.push(child);
+				folders.push(...this.getFoldersRecursively(child));
+			}
+		}
+		return folders.sort((a, b) => a.path.localeCompare(b.path));
 	}
 }
