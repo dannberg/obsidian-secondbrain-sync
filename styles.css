@@ -252,3 +252,41 @@
 	color: var(--text-muted);
 	font-weight: normal;
 }
+
+/* Digest warning styles */
+.secondbrain-digest-warning {
+	margin-top: 12px;
+	padding: 10px 12px;
+	border-radius: 6px;
+	border-left: 3px solid;
+}
+
+.secondbrain-digest-warning p {
+	margin: 0;
+	font-size: 0.9em;
+	line-height: 1.4;
+}
+
+.secondbrain-digest-warning.warning-success {
+	background: rgba(var(--color-green-rgb), 0.1);
+	border-left-color: var(--text-success);
+	color: var(--text-success);
+}
+
+.secondbrain-digest-warning.warning-info {
+	background: rgba(var(--color-blue-rgb), 0.1);
+	border-left-color: var(--text-accent);
+	color: var(--text-accent);
+}
+
+.secondbrain-digest-warning.warning-stale {
+	background: rgba(var(--color-yellow-rgb), 0.1);
+	border-left-color: var(--color-yellow);
+	color: var(--color-yellow);
+}
+
+.secondbrain-digest-warning.warning-critical {
+	background: rgba(var(--color-red-rgb), 0.1);
+	border-left-color: var(--text-error);
+	color: var(--text-error);
+}
