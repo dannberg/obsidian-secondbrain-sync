@@ -85,6 +85,8 @@ export interface DeleteResponse {
 export interface StatusResponse {
 	/** ISO timestamp of last sync */
 	last_sync: string | null;
+	/** Vault name stored on server (null if no notes synced yet) */
+	vault_name: string | null;
 	/** Total notes on server */
 	total_notes: number;
 	/** Notes indexed in Pinecone */

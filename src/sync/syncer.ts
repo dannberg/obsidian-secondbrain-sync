@@ -3,7 +3,7 @@
  */
 
 import { App, TFile, Notice, debounce } from 'obsidian';
-import { ApiClient } from '../api/client';
+import { ApiClient, ApiRequestError } from '../api/client';
 import { NotePayload } from '../api/types';
 import { NoteMetadata, SyncStatus, ExclusionRules } from '../types';
 import { VaultScanner } from './scanner';
@@ -181,6 +181,31 @@ export class VaultSyncer {
 		new Notice('Starting vault sync...');
 		this.updateStatus({ state: 'syncing', pendingCount: 0, syncedCount: 0 });
 
+		// Pre-sync vault mismatch check
+		try {
+			const status = await this.apiClient.getStatus();
+			const localVaultName = this.app.vault.getName();
+			if (status.vault_name && status.vault_name !== localVaultName) {
+				this.debug(`Vault mismatch: server has "${status.vault_name}", local is "${localVaultName}"`);
+				this.updateStatus({
+					state: 'error',
+					error: `Vault mismatch: server has "${status.vault_name}"`,
+				});
+				new Notice(
+					`Vault mismatch: the server has data from "${status.vault_name}", ` +
+					`but this vault is "${localVaultName}". Clear your vault data at ` +
+					`secondbraindigest.com before syncing a different vault.`,
+					10000
+				);
+				this.isSyncing = false;
+				return;
+			}
+		} catch (error) {
+			// If the status check itself fails, let the sync proceed —
+			// the server will enforce the guard on the sync request.
+			this.debug(`Pre-sync status check failed: ${error instanceof Error ? error.message : error}`);
+		}
+
 		let progressModal: SyncProgressModal | null = null;
 
 		try {
@@ -241,14 +266,23 @@ export class VaultSyncer {
 			}
 			new Notice(`Sync complete: ${filteredNotes.length} notes synced`);
 		} catch (error) {
-			const message = error instanceof Error ? error.message : 'Unknown error';
-			this.updateStatus({ state: 'error', error: message });
-
-			// Close modal and show error
+			// Close modal on any error
 			if (progressModal) {
 				progressModal.close();
 			}
-			new Notice(`Sync failed: ${message}`, 5000);
+
+			if (error instanceof ApiRequestError && error.code === 'vault_mismatch') {
+				this.updateStatus({ state: 'error', error: 'Vault mismatch' });
+				new Notice(
+					'Vault mismatch: a different vault is stored on the server. ' +
+					'Clear your vault data at secondbraindigest.com before syncing a different vault.',
+					10000
+				);
+			} else {
+				const message = error instanceof Error ? error.message : 'Unknown error';
+				this.updateStatus({ state: 'error', error: message });
+				new Notice(`Sync failed: ${message}`, 5000);
+			}
 			console.error('[SecondBrain] Full sync failed:', error);
 		} finally {
 			this.isSyncing = false;
@@ -314,9 +348,18 @@ export class VaultSyncer {
 				new Notice(`Synced ${totalChanges} changes`);
 			}
 		} catch (error) {
-			const message = error instanceof Error ? error.message : 'Unknown error';
-			this.updateStatus({ state: 'error', error: message });
-			new Notice(`Sync failed: ${message}`, 5000);
+			if (error instanceof ApiRequestError && error.code === 'vault_mismatch') {
+				this.updateStatus({ state: 'error', error: 'Vault mismatch' });
+				new Notice(
+					'Vault mismatch: a different vault is stored on the server. ' +
+					'Clear your vault data at secondbraindigest.com before syncing a different vault.',
+					10000
+				);
+			} else {
+				const message = error instanceof Error ? error.message : 'Unknown error';
+				this.updateStatus({ state: 'error', error: message });
+				new Notice(`Sync failed: ${message}`, 5000);
+			}
 			console.error('[SecondBrain] Sync changes failed:', error);
 		} finally {
 			this.isSyncing = false;
