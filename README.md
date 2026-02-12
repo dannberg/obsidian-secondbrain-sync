@@ -30,17 +30,15 @@ An Obsidian plugin that syncs your vault to [Second Brain Digest](https://second
 
 ## Setup
 
-1. Create an account at [Second Brain Digest](https://app.secondbraindigest.com)
-2. Go to your account settings and generate an API token
-3. In Obsidian, open Settings > Second Brain Digest Sync
-4. Enter your API token
-5. Click "Test Connection" to verify
-6. Click "Sync Now" to perform your first sync
+1. **Sign up** at [Second Brain Digest](https://secondbraindigest.com)
+2. **Complete the onboarding flow** - you'll receive your API token during setup
+3. **In Obsidian**, open Settings > Second Brain Digest Sync
+4. **Paste your API token** from the onboarding page
+5. **Sync starts automatically** - your vault will begin syncing in the background
+
+The onboarding flow will guide you through vault setup, exclusion rules, and billing. Your vault syncs automatically once the token is configured - no manual "Sync Now" needed!
 
 ## Configuration
-
-### Server URL
-By default, the plugin connects to `https://app.secondbraindigest.com`. Change this only if you're self-hosting.
 
 ### Auto-Sync
 When enabled, changes are automatically synced after a 2-second debounce. Disable this if you prefer manual syncing only.
@@ -81,6 +79,14 @@ npm run build
 
 ### Testing with Local Server
 
+For local development, you'll need to temporarily modify the `SERVER_URL` constant in `src/api/client.ts` to point to your local server:
+
+```typescript
+const SERVER_URL = 'http://localhost:8000';
+```
+
+Then:
+
 1. Start the Second Brain Digest Django server:
    ```bash
    cd ~/Code/secondbraindigest
@@ -88,9 +94,14 @@ npm run build
    python manage.py runserver 0.0.0.0:8000
    ```
 
-2. In plugin settings, set Server URL to `http://localhost:8000`
+2. Generate an API token from the local web interface
 
-3. Generate an API token from the web interface
+3. Rebuild the plugin with your changes:
+   ```bash
+   npm run dev
+   ```
+
+**Important:** Remember to revert the SERVER_URL change before committing!
 
 ## Architecture
 
