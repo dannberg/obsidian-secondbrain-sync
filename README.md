@@ -1,5 +1,11 @@
 # Second Brain Digest Sync
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![GitHub release](https://img.shields.io/github/v/release/dannberg/obsidian-secondbrain-sync)](https://github.com/dannberg/obsidian-secondbrain-sync/releases)
+[![Documentation](https://img.shields.io/badge/docs-secondbraindigest.com-blue)](https://docs.secondbraindigest.com)
+![Obsidian](https://img.shields.io/badge/Obsidian-Plugin-purple?logo=obsidian)
+![GitHub stars](https://img.shields.io/github/stars/dannberg/obsidian-secondbrain-sync?style=social)
+
 An Obsidian plugin that syncs your vault to [Second Brain Digest](https://secondbraindigest.com) for personalized daily digest emails with AI-powered insights.
 
 **[View Full Documentation](https://docs.secondbraindigest.com)**
