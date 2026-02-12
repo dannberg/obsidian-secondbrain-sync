@@ -1,8 +1,8 @@
 # Welcome, Beta Testers!
 
-Thank you so much for being one of the first people to try Second Brain Digest! As a personally invited beta tester, you're getting early access to help shape this product into something truly useful for Obsidian power users like yourself.
+Thank you so much for being one of the first people to try [Second Brain Digest](https://secondbraindigest.com/)! As a beta tester, you're getting early access to help shape this product into something truly useful for Obsidian power users like yourself.
 
-This guide will walk you through getting set up. Please don't hesitate to reach out if you hit any snags—your feedback is invaluable, and I'm here to help you get everything working smoothly.
+This guide will walk you through getting set up. Please don't hesitate to reach out if you hit any snags—your feedback is invaluable, and I'm here to help you get everything working smoothly. You can email me at [dann@secondbraindigest.com](mailto:dann@secondbraindigest.com).
 
 ## What to Expect During Beta
 
@@ -20,11 +20,10 @@ The goal is to work together to make this genuinely useful for your workflow.
 ### Step 1: Create Your Account
 
 1. Visit [secondbraindigest.com](https://secondbraindigest.com) and click **Sign Up**
-2. Enter your email address
-3. Check your inbox for a magic link and click it to complete signup
-4. You're now logged in to your dashboard
+2. Enter your email address and the invite code you were provided
+3. Check your inbox for a magic link and click it to begin the onboarding process
 
-### Step 2: Install the Obsidian Plugin
+### Step 2: Onboarding and Obsidian Plugin setup
 
 The plugin securely syncs your vault data to Second Brain Digest. Don't worry—you have complete control over what gets included.
 
@@ -36,7 +35,7 @@ Since we're still in beta, the plugin isn't yet in the Obsidian Community Plugin
 2. Look for the `.zip` file (e.g., `secondbrain-sync-X.Y.Z.zip`)
 3. Extract the zip file
 4. Copy the extracted files (`main.js`, `manifest.json`, `styles.css`) to your vault's `.obsidian/plugins/second-brain-digest/` folder
-   - You may need to create this folder if it doesn't exist
+   - You will need to create this folder if it doesn't exist
 5. Restart Obsidian
 6. Go to **Settings > Community plugins** and enable "Second Brain Digest"
 
@@ -44,10 +43,9 @@ Since we're still in beta, the plugin isn't yet in the Obsidian Community Plugin
 
 #### Getting Your API Token
 
-1. In your Second Brain Digest dashboard, go to **Settings > API Tokens**
-2. Click **Generate New Token**
+1. During your onboarding process, you'll be provided with your **API Token**
 3. Copy the token (important: you won't be able to see it again)
-4. In Obsidian, go to **Settings > Second Brain Digest**
+4. In Obsidian, go to **Settings > Second Brain Digest Sync**
 5. Paste your API token and click **Verify Connection**
 
 ### Step 3: Choose What to Sync
@@ -62,7 +60,7 @@ You have full control over what gets synced. Before the initial sync, consider:
 - Add tags like `#private` or `#sensitive` to the exclusion list
 - Any note with these tags will be automatically skipped
 
-You can always adjust these settings later, both in the plugin and in your dashboard settings.
+You can always adjust these settings later from the Second Brain Digest Sync plugin settings.
 
 ### Step 4: Initial Sync
 
@@ -73,21 +71,7 @@ Once you're ready:
 3. You can check sync status in the plugin settings
 4. Watch for any error messages and let me know if you see them
 
-### Step 5: Generate Your First Digest
-
-Let's make sure everything is working:
-
-1. Go to your dashboard at [secondbraindigest.com](https://secondbraindigest.com)
-2. Click **Generate Digest**
-3. Check your email for your first digest
-
-**What you'll see:**
-- AI-powered insights about your recent note activity
-- Connections between your notes
-- Resurfaced older notes that might be relevant
-- And more, depending on which modules are enabled
-
-### Step 6: Configure Your Preferences
+### Step 5: Configure Your Preferences
 
 Now that you've seen a digest, customize it to your liking:
 
@@ -97,6 +81,8 @@ Now that you've seen a digest, customize it to your liking:
 - **Schedule** - Set up automated daily digests (or choose a different frequency)
 
 See [Settings & Preferences](settings.md) for detailed configuration options.
+
+That's it! Welcome to Second Brain Digest. 🧠
 
 ## What to Test & Feedback I Need
 
@@ -110,7 +96,7 @@ As a beta tester, here's what would be most helpful:
 6. **Feature requests** - What's missing that would make this more valuable for you?
 
 **How to share feedback:**
-- Email me directly (you have my address from the invite)
+- Email me directly
 - Open an issue on [GitHub](https://github.com/dannberg/second-brain-digest/issues) if you're comfortable with that
 - Just reply to a digest email with thoughts
 
