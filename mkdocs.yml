@@ -14,6 +14,7 @@ theme:
 nav:
   - Home: index.md
   - User Guide:
+    - Beta Tester Onboarding: user-guide/beta-testers.md
     - Getting Started: user-guide/getting-started.md
     - Connecting Your Vault: user-guide/connecting-vault.md
     - Settings & Preferences: user-guide/settings.md
