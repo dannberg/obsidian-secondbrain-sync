@@ -4,6 +4,7 @@ repo_url: https://github.com/dannberg/obsidian-secondbrain-sync
 
 theme:
   name: material
+  custom_dir: docs/overrides
   palette:
     primary: indigo
   features:
