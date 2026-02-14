@@ -1,4 +1,5 @@
 site_name: Second Brain Digest
+site_url: https://docs.secondbraindigest.com
 site_description: AI-powered daily digests from your Obsidian vault
 repo_url: https://github.com/dannberg/obsidian-secondbrain-sync
 
