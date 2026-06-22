@@ -50,7 +50,15 @@ The plugin syncs automatically when you make changes to your vault. You can also
 
 ### How do I delete my synced data?
 
-Go to **Settings > Vault Sync > Clear Vault Data** in your dashboard. This permanently removes all synced notes from our servers.
+Go to your **Account** page and use **Reset Synced Vault**. This permanently removes all synced notes from our servers. Your local Obsidian vault is not affected, and your account, settings, and API key are kept.
+
+### Can I sync the same vault from more than one computer?
+
+Yes. Second Brain Digest identifies your vault by its **content**, not by the folder name, so the same vault syncs together across machines even if you named the vault folder differently on each computer. No extra setup is needed.
+
+### I'm seeing a "Vault mismatch" message — what does it mean?
+
+This means the notes being synced don't match the vault already on your account, so we treat it as a **different** vault and pause syncing to protect your data. If you intend to switch to a different vault, open your **Account** page, use **Reset Synced Vault**, then sync again. (You should not see this when syncing the same vault from multiple computers — that case is handled automatically.)
 
 ## Digests
 

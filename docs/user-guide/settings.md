@@ -85,14 +85,23 @@ View your current sync status:
 - Last sync time
 - Any sync errors
 
-### Clear Vault Data
+### Reset Synced Vault
 
-To remove all synced data:
+On your **Account** page, the **Reset Synced Vault** action clears all notes
+synced to Second Brain Digest so you can start fresh:
 
-1. Click **Clear Vault Data**
+1. Click **Reset Synced Vault**
 2. Confirm the action
-3. Your notes will be removed from our servers
-4. You'll need to re-sync to generate digests
+3. Your synced notes are permanently removed from our servers (your local
+   Obsidian vault is not touched, and your account, settings, and API key are kept)
+4. Run a sync from the Obsidian plugin to re-populate your data
+
+Use this when you want to **switch to a different vault** on the same account.
+
+**Syncing the same vault from multiple computers?** You do **not** need to
+reset — even if you named the vault folder differently on each computer. Second
+Brain Digest identifies your vault by its content, so differently-named folders
+holding the same notes sync together automatically.
 
 ## Account Settings
 
