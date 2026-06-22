@@ -181,30 +181,9 @@ export class VaultSyncer {
 		new Notice('Starting vault sync...');
 		this.updateStatus({ state: 'syncing', pendingCount: 0, syncedCount: 0 });
 
-		// Pre-sync vault mismatch check
-		try {
-			const status = await this.apiClient.getStatus();
-			const localVaultName = this.app.vault.getName();
-			if (status.vault_name && status.vault_name !== localVaultName) {
-				this.debug(`Vault mismatch: server has "${status.vault_name}", local is "${localVaultName}"`);
-				this.updateStatus({
-					state: 'error',
-					error: `Vault mismatch: server has "${status.vault_name}"`,
-				});
-				new Notice(
-					`Vault mismatch: the server has data from "${status.vault_name}", ` +
-					`but this vault is "${localVaultName}". Clear your vault data at ` +
-					`secondbraindigest.com before syncing a different vault.`,
-					10000
-				);
-				this.isSyncing = false;
-				return;
-			}
-		} catch (error) {
-			// If the status check itself fails, let the sync proceed —
-			// the server will enforce the guard on the sync request.
-			this.debug(`Pre-sync status check failed: ${error instanceof Error ? error.message : error}`);
-		}
+		// No client-side vault-name pre-check: the server now decides vault identity by
+		// content overlap, so the same vault synced from a differently-named folder is
+		// accepted. A genuinely different vault is rejected server-side (handled below).
 
 		let progressModal: SyncProgressModal | null = null;
 
@@ -274,8 +253,9 @@ export class VaultSyncer {
 			if (error instanceof ApiRequestError && error.code === 'vault_mismatch') {
 				this.updateStatus({ state: 'error', error: 'Vault mismatch' });
 				new Notice(
-					'Vault mismatch: a different vault is stored on the server. ' +
-					'Clear your vault data at secondbraindigest.com before syncing a different vault.',
+					'This looks like a different vault than the one already synced to your ' +
+					'account. If you want to replace it, reset your synced vault from your ' +
+					'account settings at secondbraindigest.com, then sync again.',
 					10000
 				);
 			} else {
@@ -351,8 +331,9 @@ export class VaultSyncer {
 			if (error instanceof ApiRequestError && error.code === 'vault_mismatch') {
 				this.updateStatus({ state: 'error', error: 'Vault mismatch' });
 				new Notice(
-					'Vault mismatch: a different vault is stored on the server. ' +
-					'Clear your vault data at secondbraindigest.com before syncing a different vault.',
+					'This looks like a different vault than the one already synced to your ' +
+					'account. If you want to replace it, reset your synced vault from your ' +
+					'account settings at secondbraindigest.com, then sync again.',
 					10000
 				);
 			} else {
@@ -404,6 +385,7 @@ export class VaultSyncer {
 				notes: payloads,
 				is_final_batch: isLastBatch,
 				vault_name: this.app.vault.getName(),
+				is_full_sync: isFullSync,
 			});
 
 			// Update tracker with synced hashes
