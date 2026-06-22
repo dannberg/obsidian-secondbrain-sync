@@ -42,6 +42,12 @@ export interface SyncRequest {
 	is_final_batch: boolean;
 	/** Name of the Obsidian vault (for deep links) */
 	vault_name?: string;
+	/**
+	 * Whether this is a full vault sync (every note) vs an incremental change sync.
+	 * The server uses this to decide vault identity by content overlap on full syncs,
+	 * so the same vault from a differently-named folder is not rejected as a mismatch.
+	 */
+	is_full_sync?: boolean;
 }
 
 /**
