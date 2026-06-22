@@ -24,6 +24,7 @@ import { VaultSyncer } from './sync/syncer';
 import { ScheduledSyncManager } from './sync/scheduled-sync';
 import { SecondBrainSettingTab } from './settings/settings-tab';
 import { validateSettings, isConfigured } from './settings/settings-data';
+import { UpdateChecker } from './update-checker';
 import { StatusBarManager } from './ui/status-bar';
 
 /**
@@ -48,6 +49,7 @@ export default class SecondBrainSyncPlugin extends Plugin {
 	syncer!: VaultSyncer;
 	scheduledSyncManager!: ScheduledSyncManager;
 	statusBar!: StatusBarManager;
+	updateChecker!: UpdateChecker;
 
 	private eventRefs: Array<ReturnType<typeof this.registerEvent>> = [];
 	private loadedSyncState: SyncState | null = null;
@@ -114,10 +116,15 @@ export default class SecondBrainSyncPlugin extends Plugin {
 	 * Initialize all plugin components.
 	 */
 	private initializeComponents(): void {
+		// Tracks plugin-version advisories from the server (sideloaded plugins get no
+		// automatic update prompts).
+		this.updateChecker = new UpdateChecker(this.manifest.version);
+
 		// API client
 		this.apiClient = new ApiClient({
 			apiToken: this.settings.apiToken,
 			debugMode: this.settings.debugMode,
+			pluginVersion: this.manifest.version,
 		});
 
 		// Vault scanner
@@ -150,6 +157,8 @@ export default class SecondBrainSyncPlugin extends Plugin {
 						console.log(`[SecondBrain] ${message}`);
 					}
 				},
+				onVersionAdvisory: (latest, minSupported) =>
+					this.updateChecker.evaluate(latest, minSupported),
 			},
 			this.settings.debugMode
 		);

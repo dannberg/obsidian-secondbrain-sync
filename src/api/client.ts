@@ -27,6 +27,8 @@ const SERVER_URL = 'https://secondbraindigest.com';
 export interface ApiClientConfig {
 	apiToken: string;
 	debugMode?: boolean;
+	/** Plugin version, sent as the X-Plugin-Version header so the server can track it. */
+	pluginVersion?: string;
 }
 
 /**
@@ -156,6 +158,9 @@ export class ApiClient {
 			'Authorization': `Token ${this.config.apiToken}`,
 			'Content-Type': 'application/json',
 		};
+		if (this.config.pluginVersion) {
+			headers['X-Plugin-Version'] = this.config.pluginVersion;
+		}
 
 		const params: RequestUrlParam = {
 			url,

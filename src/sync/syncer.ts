@@ -27,6 +27,8 @@ const DEBOUNCE_DELAY = 2000;
 export interface SyncCallbacks {
 	onStatusChange: (status: SyncStatus) => void;
 	onDebug?: (message: string) => void;
+	/** Plugin-version advisory from a sync response (used to nudge users to update). */
+	onVersionAdvisory?: (latest?: string, minSupported?: string) => void;
 }
 
 /**
@@ -387,6 +389,12 @@ export class VaultSyncer {
 				vault_name: this.app.vault.getName(),
 				is_full_sync: isFullSync,
 			});
+
+			// Surface any plugin-version advisory the server returned.
+			this.callbacks.onVersionAdvisory?.(
+				response.latest_plugin_version,
+				response.min_supported_plugin_version
+			);
 
 			// Update tracker with synced hashes
 			const hashUpdates: Record<string, string> = {};
