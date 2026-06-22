@@ -65,6 +65,10 @@ export interface SyncResponse {
 		path: string;
 		error: string;
 	}>;
+	/** Newest available plugin version (advisory from the server). */
+	latest_plugin_version?: string;
+	/** Below this version the plugin warns that sync may break. */
+	min_supported_plugin_version?: string;
 }
 
 /**

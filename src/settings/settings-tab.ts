@@ -12,6 +12,7 @@ import {
 } from 'obsidian';
 import SecondBrainSyncPlugin from '../main';
 import { ExclusionRules } from '../types';
+import { RELEASES_URL } from '../update-checker';
 import {
 	parseTagExclusions,
 	formatTagExclusions,
@@ -31,6 +32,9 @@ export class SecondBrainSettingTab extends PluginSettingTab {
 
 		// Header
 		containerEl.createEl('h1', { text: 'Second Brain Digest Sync' });
+
+		// Update banner (the plugin is sideloaded, so Obsidian won't prompt for updates)
+		this.renderUpdateBanner(containerEl);
 
 		// Connection section
 		containerEl.createEl('h2', { text: 'Connection' });
@@ -280,6 +284,49 @@ export class SecondBrainSettingTab extends PluginSettingTab {
 					new Notice('Sync state reset. Run Sync Now to perform a full sync.');
 					this.renderSyncStatus(statusEl);
 				}));
+	}
+
+	/**
+	 * Show an "update available" banner when the server reports a newer version.
+	 * Renders nothing until a sync has returned an advisory and we're behind it.
+	 */
+	private renderUpdateBanner(containerEl: HTMLElement): void {
+		const status = this.plugin.updateChecker.getStatus();
+		if (!status.outdated || !status.latest) {
+			return;
+		}
+
+		const banner = containerEl.createEl('div', { cls: 'secondbrain-update-banner' });
+		banner.style.padding = '0.75rem 1rem';
+		banner.style.margin = '0 0 1rem 0';
+		banner.style.borderRadius = '6px';
+		banner.style.border = '1px solid';
+
+		if (status.belowMinimum) {
+			banner.style.borderColor = '#fecaca';
+			banner.style.background = '#fef2f2';
+			banner.style.color = '#991b1b';
+			banner.createEl('strong', {
+				text: `Update required — your version (${status.current}) is no longer supported.`,
+			});
+			banner.createEl('div', {
+				text: `Version ${status.latest} is available. Syncing may stop working until you update.`,
+			});
+		} else {
+			banner.style.borderColor = '#bfdbfe';
+			banner.style.background = '#eff6ff';
+			banner.style.color = '#1e40af';
+			banner.createEl('strong', { text: `Update available: version ${status.latest}` });
+			banner.createEl('div', { text: `You're on ${status.current}.` });
+		}
+
+		const link = banner.createEl('a', {
+			text: 'Download the latest release',
+			href: RELEASES_URL,
+		});
+		link.style.display = 'inline-block';
+		link.style.marginTop = '0.4rem';
+		link.style.fontWeight = '600';
 	}
 
 	private renderSyncStatus(containerEl: HTMLElement): void {
