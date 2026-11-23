@@ -14,6 +14,26 @@ theme:
     - navigation.sections
     - navigation.expand
     - search.highlight
+    - content.code.copy
+    - content.tabs.link
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true
+
+validation:
+  links:
+    anchors: warn
+    absolute_links: warn
+    unrecognized_links: warn
 
 nav:
   - Home: index.md
@@ -30,5 +50,12 @@ nav:
     - Connections & Crosslinks: modules/connections.md
     - Random Resurfaced Note: modules/random-note.md
     - This Day in History: modules/todays-history.md
+  - Connect Your AI Agent:
+    - Overview: agents/index.md
+    - Set Up Your Client: agents/setup.md
+    - Permissions: agents/permissions.md
+    - Tools: agents/tools.md
+    - Limits: agents/limits.md
+    - Troubleshooting: agents/troubleshooting.md
   - FAQ: faq.md
   - secondbraindigest.com: https://secondbraindigest.com
