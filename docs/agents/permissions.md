@@ -10,7 +10,7 @@ Each MCP token carries the permissions you pick when you create it, and your age
 | **Search your notes** | `search:read` | Find passages in your synced notes that match what you describe. | [`search_notes`](tools.md#search-notes) |
 | **Ask questions about your vault** | `search:rag` | Get a written answer with the notes it came from. This uses AI and is limited to 20 calls an hour. | [`ask_vault`](tools.md#ask-vault) |
 | **Read your digest settings** | `settings:read` | See your digest preferences (such as schedule, frequency, timezone, modules and AI provider) and whether an AI provider key is saved, as true or false, never the key itself. | [`get_settings`](tools.md#get-settings) |
-| **Change your digest settings** | `settings:write` | Change the delivery time and day, how often digests arrive (daily, weekly or monthly), your timezone and which modules are included. | [`update_settings`](tools.md#update-settings) |
+| **Change your digest settings** | `settings:write` | Change the delivery time and day, how often digests arrive (daily, weekly or monthly), how they are delivered (email, RSS or both), your timezone and which modules are included. | [`update_settings`](tools.md#update-settings) |
 | **Send a digest now** | `digest:trigger` | Generate a digest right away, saved to your history and emailed if email delivery is on. At most once every 15 minutes and 20 calls an hour. | [`trigger_digest`](tools.md#trigger-digest) |
 
 **Change your digest settings** and **Send a digest now** are the two permissions that change things. The token list on the MCP page highlights them.

@@ -56,7 +56,7 @@ Returns your digest preferences and whether an AI provider key is saved (true or
 
 ### `update_settings` { #update-settings }
 
-Changes the delivery time and day, how often digests arrive (daily, weekly or monthly), your timezone and which modules are included. All of a request's changes are saved together or not at all.
+Changes the delivery time and day, how often digests arrive (daily, weekly or monthly), how they are delivered (email, RSS or both), your timezone and which modules are included. All of a request's changes are saved together or not at all.
 
 - **Needs:** **Change your digest settings** (`settings:write`). See [Permissions](permissions.md#the-six-permissions).
 - **Example request:** "Move my digest to 7:30am." You can also ask for more than one change, such as "Switch my digest to weekly on Mondays."
