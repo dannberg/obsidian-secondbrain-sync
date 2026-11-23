@@ -36,6 +36,11 @@ Choose if you want notes excluded from the service in the plugin before they eve
 ### Works With Your Workflow
 Second Brain Digest reads your vault but never modifies your notes. Your existing Obsidian workflow stays exactly the same.
 
+### Connect Your AI Agent
+Let your own AI agent (Claude Code, or Claude Desktop through the mcp-remote bridge) read your digests, search your notes and answer questions from your vault, using an MCP token you create and control.
+
+claude.ai custom connectors are not supported yet. [Connect Your AI Agent](agents/index.md) to get started.
+
 ## Getting Started
 
 Ready to dive in? Head to the [Getting Started](user-guide/getting-started.md) guide to set up your account and connect your vault.

@@ -110,6 +110,34 @@ Connection quality depends on:
 
 Try improving your tagging consistency or enabling AI for better results.
 
+## AI Agents (MCP)
+
+### Can I use my own AI agent with Second Brain Digest?
+
+Yes. Claude Code is supported, and Claude Desktop works through the mcp-remote bridge (Node.js 20.18.1 or newer).
+claude.ai custom connectors are not supported yet.
+See [Connect Your AI Agent](agents/index.md).
+
+### Do I need a paid plan to connect an agent?
+
+You need an active trial or paid subscription, so the free trial works.
+If it lapses, your agent's requests are refused until you reactivate (see [HTTP 403](agents/troubleshooting.md#http-403)).
+
+### Is an MCP token the same as my plugin API token?
+
+No. You create MCP tokens on the **MCP** page of your account, and they start with `sbdmcp_`.
+The plugin key is rejected with a 401 (see [Create a token](agents/setup.md#create-a-token)).
+
+### What can my agent see?
+
+Only the notes you synced. Notes you exclude in the plugin are never synced, so your agent can't see them.
+The note passages and digests your agent asks for go to your agent and the AI provider behind it, even with read-only permissions (see [Permissions](agents/permissions.md)).
+
+### How do I disconnect an agent?
+
+Revoke its token on the **MCP** page. **Revoke all** revokes every MCP token and never your plugin key, and the agent's next request is refused.
+While a subscription is lapsed you can't open the MCP page, and a token that hasn't expired works again if you reactivate (see [Token lifetime](agents/limits.md#token-lifetime)).
+
 ## Technical Issues
 
 ### The plugin won't connect
@@ -118,6 +146,8 @@ Try improving your tagging consistency or enabling AI for better results.
 2. Check your internet connection
 3. Ensure the plugin is enabled in Obsidian
 4. Try generating a new API token
+
+Connecting an AI agent rather than the plugin? See [Troubleshooting](agents/troubleshooting.md).
 
 ### Sync is taking too long
 
