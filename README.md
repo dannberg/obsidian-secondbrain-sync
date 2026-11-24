@@ -7,6 +7,8 @@
 
 An Obsidian plugin that syncs your vault to [Second Brain Digest](https://secondbraindigest.com) for personalized daily digest emails with AI-powered insights.
 
+Second Brain Digest is a paid service with a 7-day free trial. A subscription ($7/month or $70/year) is required to keep receiving digests after the trial ends.
+
 **[View Full Documentation](https://docs.secondbraindigest.com)**
 
 ## Features
@@ -34,6 +36,8 @@ An Obsidian plugin that syncs your vault to [Second Brain Digest](https://second
 4. Enable the plugin in Settings > Community Plugins
 
 ## Setup
+
+Your notes are synced to Second Brain Digest servers to generate your digest. Read the privacy policy: https://secondbraindigest.com/privacy/
 
 1. **Sign up** at [Second Brain Digest](https://secondbraindigest.com)
 2. **Complete the onboarding flow** - you'll receive your API token during setup
